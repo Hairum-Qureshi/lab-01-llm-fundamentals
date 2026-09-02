@@ -10,21 +10,54 @@ export default function ChatContainer() {
 		<div className="flex-1 bg-slate-500/10 min-h-screen max-h-auto">
 			<div className="m-auto w-3/4 h-full">
 				<div className="relative flex flex-col justify-center items-center m-auto h-full">
-					<div className="flex flex-col justify-center items-center w-1/2">
+					<div className="flex flex-col justify-center items-center w-3/4">
 						{!hideGreeting && (
-							<>
-								<h1 className="text-4xl font-semibold text-blue-600">
-									Hello, I'm Remi
-								</h1>
-								<h3 className="text-2xl font-semibold text-blue-800">
-									What can I help you with today?
-								</h3>
-								<p className="text-sm text-gray-500 my-2 text-center">
-									<strong>NOTE:</strong> this is a demo app and no messages are
-									actually being stored in a database. Upon refresh, all
-									messages will be lost.
-								</p>
-							</>
+							<div>
+								<div className="flex flex-col justify-center items-center">
+									<h1 className="text-4xl font-semibold text-blue-600">
+										Hello, I'm Remi
+									</h1>
+									<h3 className="text-2xl font-semibold text-blue-800">
+										What can I help you with today?
+									</h3>
+									<p className="text-sm text-gray-500 my-2 text-center">
+										<strong>NOTE:</strong> this is a demo app and no messages
+										are actually being stored in a database. Upon refresh, all
+										messages will be lost.
+									</p>
+								</div>
+								<div className="flex flex-col justify-center items-center w-full">
+									<div className="flex flex-col gap-2 my-5"></div>
+									<div className="flex gap-2">
+										<div
+											className="bg-gray-200 flex items-center w-3/4 p-2 rounded-md hover:bg-gray-300 cursor-pointer"
+											onClick={() => {
+												setHideGreeting(true);
+											}}
+										>
+											<h2 className="text-center">
+												What's a good way to learn a new programming language?
+											</h2>
+										</div>
+										<div
+											className="bg-gray-200 flex items-center w-3/4 p-2 rounded-md hover:bg-gray-300 cursor-pointer"
+											onClick={() => setHideGreeting(true)}
+										>
+											<h2 className="text-center">
+												What are some tips for improving my coding skills?
+											</h2>
+										</div>
+										<div
+											className="bg-gray-200 flex items-center w-3/4 p-2 rounded-md hover:bg-gray-300 cursor-pointer"
+											onClick={() => setHideGreeting(true)}
+										>
+											<h2 className="text-center">
+												How can I stay motivated while learning to code?
+											</h2>
+										</div>
+									</div>
+								</div>
+							</div>
 						)}
 					</div>
 					{hideGreeting && (
