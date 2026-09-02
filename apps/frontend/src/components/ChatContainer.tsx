@@ -7,9 +7,11 @@ export default function ChatContainer() {
 	const [hideGreeting, setHideGreeting] = useState(false);
 
 	return (
-		<div className="flex-1 bg-slate-500/10 min-h-screen max-h-auto">
+		<div className="bg-slate-500/10 h-screen w-full">
 			<div className="m-auto w-3/4 h-full">
-				<div className="relative flex flex-col justify-center items-center m-auto h-full">
+				<div
+					className={`relative flex flex-col ${!hideGreeting && "justify-center items-center"} m-auto h-full`}
+				>
 					<div className="flex flex-col justify-center items-center w-3/4">
 						{!hideGreeting && (
 							<div>
@@ -61,7 +63,23 @@ export default function ChatContainer() {
 						)}
 					</div>
 					{hideGreeting && (
-						<div className="flex my-5 flex-col gap-2 w-full h-full overflow-y-auto p-2">
+						<div className="flex flex-col gap-2 w-full h-3/4 mt-5 items-center overflow-y-auto p-2">
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
+							<MessageBubble />
 							<MessageBubble />
 						</div>
 					)}
