@@ -4,7 +4,7 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 
 export default function SideNav() {
 	return (
-		<div className="w-15 p-3 bg-blue-600 min-h-screen">
+		<div className="w-15 p-3 bg-blue-600 h-screen">
 			<div className="flex flex-col items-center space-y-6">
 				<div className="flex flex-col items-center space-y-2 hover:cursor-pointer">
 					<LuPanelLeft className="text-white text-lg" />
