@@ -1,4 +1,6 @@
 import * as dotenv from 'dotenv';
+import { ConfigService } from '@nestjs/config';
+
 dotenv.config();
 
 import { NestFactory } from '@nestjs/core';
@@ -11,7 +13,7 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL,
     credentials: true,
   });
-  
+
   const configService = app.get(ConfigService);
   const PORT = configService.get<number>('PORT') ?? 3000;
   await app.listen(PORT);
