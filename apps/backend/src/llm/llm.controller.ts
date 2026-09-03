@@ -7,7 +7,7 @@ export class LlmController {
 
   @Get('ask')
   @Sse()
-  async askQuestion(@Query('query') query: string) {
+  askQuestion(@Query('query') query: string) {
     return this.llmService.generateResponse(query);
   }
 }
