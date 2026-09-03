@@ -1,6 +1,8 @@
 import { FaArrowUp } from "react-icons/fa6";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MessageBubble from "./MessageBubble";
+import { DotWave } from "ldrs/react";
+import "ldrs/react/DotWave.css";
 
 export default function ChatContainer() {
 	const [message, setMessage] = useState("");
@@ -10,6 +12,7 @@ export default function ChatContainer() {
 	// TODO - add scroll to bottom functionality when new messages are added
 	// TODO - have the AI recall previous messages in the conversation to provide more context for its responses
 	// TODO - if you select one of the 3 suggested questions, the textarea should remain empty and not populate with that question
+	// TODO - add a loading indicator when the AI is responding
 
 	const [messages, setMessages] = useState<
 		{ message: string; isAIResponse: boolean }[]
@@ -50,13 +53,14 @@ export default function ChatContainer() {
 		};
 
 		source.onerror = error => {
-			console.error("SSE error:", error);
+			alert(
+				JSON.parse(JSON.parse((error as MessageEvent).data).error.message).error
+					.message
+			);
+			source.close();
+			setIsAIResponding(false);
 		};
 	}
-
-	useEffect(() => {
-		processMessage();
-	}, [message]);
 
 	return (
 		<div className="bg-slate-500/10 h-screen w-full">
@@ -170,11 +174,15 @@ export default function ChatContainer() {
 											message={msg.message}
 											isAIResponse={msg.isAIResponse}
 										/>
-									) : null;
+									) : (
+										<div className="flex bg-blue-600 mr-auto p-3 rounded-md h-auto wrap-break-word items-center">
+											<DotWave size="30" speed="1" color="white" />
+										</div>
+									);
 								})}
 						</div>
 					)}
-					<div className="w-full absolute bottom-0 mb-10 p-2">
+					<div className="w-full absolute bottom-0 mb-4 p-2">
 						<div className="relative">
 							<textarea
 								className="w-full h-24 p-3 pr-12 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
