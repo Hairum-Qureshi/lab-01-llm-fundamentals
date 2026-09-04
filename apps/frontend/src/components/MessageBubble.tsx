@@ -2,10 +2,12 @@ import Markdown from "react-markdown";
 
 export default function MessageBubble({
 	message,
-	isAIResponse
+	isAIResponse,
+	isError
 }: {
 	message: string;
 	isAIResponse: boolean;
+	isError: boolean;
 }) {
 	return (
 		<div
@@ -46,7 +48,7 @@ export default function MessageBubble({
 					: ""
 			} ${
 				isAIResponse
-					? "bg-blue-600 text-white mr-auto"
+					? `${isError ? "text-red-700 bg-slate-200/40 border border-blue-400" : "text-white bg-blue-600"} mr-auto`
 					: "bg-gray-300 text-black ml-auto"
 			}`}
 		>
