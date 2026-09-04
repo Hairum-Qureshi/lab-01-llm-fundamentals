@@ -1,5 +1,5 @@
 import { FaArrowUp } from "react-icons/fa6";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import MessageBubble from "./MessageBubble";
 import { DotWave } from "ldrs/react";
 import "ldrs/react/DotWave.css";
@@ -8,9 +8,8 @@ export default function ChatContainer() {
 	const [message, setMessage] = useState("");
 	const [hideGreeting, setHideGreeting] = useState(false);
 	const [isAIResponding, setIsAIResponding] = useState(false);
+	const messagesContainer = useRef<HTMLDivElement | null>(null);
 
-	// TODO - add scroll to bottom functionality when new messages are added
-	// TODO - have the AI recall previous messages in the conversation to provide more context for its responses
 	// TODO - if you select one of the 3 suggested questions, the textarea should remain empty and not populate with that question
 
 	const [messages, setMessages] = useState<
@@ -60,6 +59,13 @@ export default function ChatContainer() {
 			setIsAIResponding(false);
 		};
 	}
+
+	useEffect(() => {
+		if (messagesContainer.current) {
+			messagesContainer.current.scrollTop =
+				messagesContainer.current.scrollHeight;
+		}
+	}, [messages]);
 
 	return (
 		<div className="bg-slate-500/10 h-screen w-full">
@@ -164,7 +170,10 @@ export default function ChatContainer() {
 						)}
 					</div>
 					{hideGreeting && (
-						<div className="flex flex-col gap-2 w-full h-3/4 mt-5 items-center overflow-y-auto p-2">
+						<div
+							className="flex flex-col gap-2 w-full h-3/4 mt-5 items-center overflow-y-auto p-2"
+							ref={messagesContainer}
+						>
 							{messages.length &&
 								messages.map((msg, index) => {
 									return msg.message ? (
