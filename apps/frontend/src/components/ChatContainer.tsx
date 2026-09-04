@@ -10,24 +10,26 @@ export default function ChatContainer() {
 	const [isAIResponding, setIsAIResponding] = useState(false);
 	const messagesContainer = useRef<HTMLDivElement | null>(null);
 
-	// TODO - if you select one of the 3 suggested questions, the textarea should remain empty and not populate with that question
-
 	const [messages, setMessages] = useState<
-		{ message: string; isAIResponse: boolean }[]
+		{ message: string; isAIResponse: boolean; isError: boolean }[]
 	>([]);
+	const isWaitingForAIResponse =
+		messages.length > 0 &&
+		messages[messages.length - 1].isAIResponse &&
+		!messages[messages.length - 1].message;
 
-	function processMessage() {
-		const question = encodeURIComponent(message);
+	function processMessage(suggestedQuestion?: string) {
+		const question = encodeURIComponent(suggestedQuestion ?? message);
 
 		if (!question.trim()) return;
+
+		setIsAIResponding(true);
 
 		const source = new EventSource(
 			`${import.meta.env.VITE_BACKEND_URL}/llm/ask?query=${question}`
 		);
 
 		source.onmessage = event => {
-			setIsAIResponding(true);
-
 			if (event.data === "[DONE]") {
 				source.close();
 				setIsAIResponding(false);
@@ -43,7 +45,8 @@ export default function ChatContainer() {
 				updated[updated.length - 1] = {
 					...lastMessage,
 					message: lastMessage.message + event.data,
-					isAIResponse: true
+					isAIResponse: true,
+					isError: false
 				};
 
 				return updated;
@@ -51,10 +54,37 @@ export default function ChatContainer() {
 		};
 
 		source.onerror = error => {
-			alert(
-				JSON.parse(JSON.parse((error as MessageEvent).data).error.message).error
-					.message
-			);
+			let errorMessage =
+				"There was a problem generating a response. Please try again later.";
+
+			try {
+				const parsedError = JSON.parse(
+					JSON.parse((error as MessageEvent).data).error.message
+				);
+				errorMessage = parsedError.error.message ?? errorMessage;
+			} catch {
+
+				// Keep the default fallback message when error payload is missing or malformed.
+			}
+
+			setMessages(prev => {
+				if (prev.length === 0) return prev;
+
+				const updated = [...prev];
+				const lastMessage = updated[updated.length - 1];
+
+				if (lastMessage.isAIResponse && !lastMessage.message) {
+					updated[updated.length - 1] = {
+						...lastMessage,
+						message: errorMessage,
+						isError: true
+					};
+				}
+
+				return updated;
+			});
+
+			// alert(errorMessage);
 			source.close();
 			setIsAIResponding(false);
 		};
@@ -95,21 +125,23 @@ export default function ChatContainer() {
 											className="bg-gray-200 flex items-center justify-center w-3/4 p-4 rounded-md hover:bg-gray-300 cursor-pointer"
 											onClick={() => {
 												setHideGreeting(true);
-												setMessage(
-													"What's a good way to learn a new programming language?"
-												);
 												setMessages(prevMessages => [
 													...prevMessages,
 													{
 														message:
 															"What's a good way to learn a new programming language?",
-														isAIResponse: false
+														isAIResponse: false,
+														isError: false
 													},
 													{
 														message: "",
-														isAIResponse: true
+														isAIResponse: true,
+														isError: false
 													}
 												]);
+												processMessage(
+													"What's a good way to learn a new programming language?"
+												);
 											}}
 										>
 											<h2>
@@ -120,21 +152,23 @@ export default function ChatContainer() {
 											className="bg-gray-200 flex items-center justify-center w-3/4 p-4 rounded-md hover:bg-gray-300 cursor-pointer"
 											onClick={() => {
 												setHideGreeting(true);
-												setMessage(
-													"What are some tips for improving my coding skills?"
-												);
 												setMessages(prevMessages => [
 													...prevMessages,
 													{
 														message:
 															"What are some tips for improving my coding skills?",
-														isAIResponse: false
+														isAIResponse: false,
+														isError: false
 													},
 													{
 														message: "",
-														isAIResponse: true
+														isAIResponse: true,
+														isError: false
 													}
 												]);
+												processMessage(
+													"What are some tips for improving my coding skills?"
+												);
 											}}
 										>
 											<h2>
@@ -145,21 +179,23 @@ export default function ChatContainer() {
 											className="bg-gray-200 flex items-center justify-center w-3/4 p-4 rounded-md hover:bg-gray-300 cursor-pointer"
 											onClick={() => {
 												setHideGreeting(true);
-												setMessage(
-													"How can I stay motivated while learning to code?"
-												);
 												setMessages(prevMessages => [
 													...prevMessages,
 													{
 														message:
 															"How can I stay motivated while learning to code?",
-														isAIResponse: false
+														isAIResponse: false,
+														isError: false
 													},
 													{
 														message: "",
-														isAIResponse: true
+														isAIResponse: true,
+														isError: false
 													}
 												]);
+												processMessage(
+													"How can I stay motivated while learning to code?"
+												);
 											}}
 										>
 											<h2>How can I stay motivated while learning to code?</h2>
@@ -174,16 +210,17 @@ export default function ChatContainer() {
 							className="flex flex-col gap-2 w-full h-3/4 mt-5 items-center overflow-y-auto p-2"
 							ref={messagesContainer}
 						>
-							{messages.length &&
+							{messages.length > 0 &&
 								messages.map((msg, index) => {
 									return msg.message ? (
 										<MessageBubble
 											key={index}
 											message={msg.message}
 											isAIResponse={msg.isAIResponse}
+                                            isError={msg.isError}
 										/>
 									) : (
-										<div className="flex bg-blue-600 mr-auto p-3 rounded-md h-auto wrap-break-word items-center">
+										<div className="flex bg-blue-600 mr-auto p-3 rounded-md h-auto items-center">
 											<DotWave size="30" speed="1" color="white" />
 										</div>
 									);
@@ -196,8 +233,14 @@ export default function ChatContainer() {
 								className="w-full h-24 p-3 pr-12 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 								placeholder="Type your message here..."
 								value={message}
+								disabled={isAIResponding || isWaitingForAIResponse}
 								onChange={e => setMessage(e.target.value)}
 								onKeyDown={e => {
+									if (isAIResponding || isWaitingForAIResponse) {
+										e.preventDefault();
+										return;
+									}
+
 									if (e.key === "Enter" && !e.shiftKey) {
 										if (!message.trim()) {
 											alert("Please enter a message before sending.");
@@ -207,10 +250,11 @@ export default function ChatContainer() {
 
 										setMessages(prevMessages => [
 											...prevMessages,
-											{ message, isAIResponse: false },
+											{ message, isAIResponse: false, isError: false },
 											{
 												message: "",
-												isAIResponse: true
+												isAIResponse: true,
+												isError: false
 											}
 										]);
 
@@ -224,18 +268,27 @@ export default function ChatContainer() {
 							<button
 								className="absolute bottom-3 right-3 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 								onClick={() => {
+									if (!message.trim()) {
+										alert("Please enter a message before sending.");
+										return;
+									}
+
 									setHideGreeting(true);
-									setMessage("");
 									setMessages(prevMessages => [
 										...prevMessages,
-										{ message, isAIResponse: false },
+										{ message, isAIResponse: false, isError: false },
 										{
 											message: "",
-											isAIResponse: true
+											isAIResponse: true,
+											isError: false
 										}
 									]);
+									processMessage();
+									setMessage("");
 								}}
-								disabled={isAIResponding || !message.trim()}
+								disabled={
+									isAIResponding || isWaitingForAIResponse || !message.trim()
+								}
 							>
 								<FaArrowUp />
 							</button>
