@@ -12,7 +12,6 @@ export default function ChatContainer() {
 	// TODO - add scroll to bottom functionality when new messages are added
 	// TODO - have the AI recall previous messages in the conversation to provide more context for its responses
 	// TODO - if you select one of the 3 suggested questions, the textarea should remain empty and not populate with that question
-	// TODO - add a loading indicator when the AI is responding
 
 	const [messages, setMessages] = useState<
 		{ message: string; isAIResponse: boolean }[]
